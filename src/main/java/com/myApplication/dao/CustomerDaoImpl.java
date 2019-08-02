@@ -41,11 +41,6 @@ public class CustomerDaoImpl implements ICustomerDao{
 			if(cust.getLoginId().equals(loginId) && cust.getLoginPassword().equals(password) )
 				customer=cust;
 		} 
-		if(customer==null)
-		{
-			customer=new Customer();
-			customer.setErrorMessage("Invalid login id/password.");
-		}
 		return customer;
 	}
 
@@ -59,11 +54,6 @@ public class CustomerDaoImpl implements ICustomerDao{
 	{
 		Customer customer=null;
 		customer= cutomerLinkedHashMap.get(customerId);
-		if(customer==null)
-		{
-			customer=new Customer();
-			customer.setErrorMessage("Record not found.");
-		}
 		return customer;
 	}
 
@@ -78,11 +68,6 @@ public class CustomerDaoImpl implements ICustomerDao{
 		Customer customer=null;
 		customer=cutomerLinkedHashMap.get(customerId);
 		cutomerLinkedHashMap.remove(customerId);
-		if(customer==null)
-		{
-			customer=new Customer();
-			customer.setErrorMessage("Record not found.");
-		}
 		return customer;
 	}
 	private static Long generateSequence()

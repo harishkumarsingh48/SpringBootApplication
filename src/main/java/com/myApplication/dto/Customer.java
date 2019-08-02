@@ -4,9 +4,27 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Size;
 
-public class Customer {
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
+import org.springframework.hateoas.ResourceSupport;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel (description = "Details about Customer dto.")
+@Entity
+public class Customer extends ResourceSupport{
+	@Id
+	@GeneratedValue
     private Long customerId;
+    @Size(min = 2, message = "Full Name name should have atleast 2 characters.")
+    @Size(max = 50, message = "Full Name name should not have more than 50 characters.")
 	private String fullName;
 	private String village;
 	private String postOffice;
@@ -18,6 +36,8 @@ public class Customer {
 	private String mobileNo;
 	private String loginId;
 	private String loginPassword;
+	@Past
+	@ApiModelProperty(notes = "Birth date should be less than current date")
 	private Date dateOfBirth;
 	private String gender;
 	private ArrayList<String> hobies;
@@ -29,6 +49,7 @@ public class Customer {
 	private Date createdOn;
 	private Long modifiedBy;
 	private Date modifiedOn;
+	@Transient
 	private List<Customer> customerList;
 	private String errorMessage;
 	public Customer() {

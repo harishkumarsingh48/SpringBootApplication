@@ -1,5 +1,9 @@
 package com.myApplication.controllers;
 
+
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.http.ResponseEntity;
+
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,9 +19,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.myApplication.config.ApplicationConstant;
+import com.myApplication.constants.ApplicationConstant;
 import com.myApplication.dto.Customer;
+import com.myApplication.exception.UserNotFoundException;
 import com.myApplication.services.CustomerServiceImpl;
+
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
+
 @CrossOrigin(maxAge = 3600)
 @RestController
 @RequestMapping(ApplicationConstant.CONTEXT_API)
@@ -39,15 +48,28 @@ public class CustomerController {
 	}
 
 	@PostMapping(ApplicationConstant.CUSTOMER_LOGIN_API)
-	public Customer logincustomer(@RequestBody Customer customer) {
-		System.out.println("login id==="+customer.getLoginId() +"  login Password==="+customer.getLoginPassword());
-		return customerServiceImpl.findByloginIdAndloginPassword(customer.getLoginId(), customer.getLoginPassword());
+	public Customer logincustomer(@RequestBody Customer reqCustomer) {
+		System.out.println("login id==="+reqCustomer.getLoginId() +"  login Password==="+reqCustomer.getLoginPassword());
+		Customer resCustomer=customerServiceImpl.findByloginIdAndloginPassword(reqCustomer.getLoginId(), reqCustomer.getLoginPassword());
+		if(resCustomer==null)
+			throw new UserNotFoundException("login id==="+reqCustomer.getLoginId());
+		return resCustomer;
 	}
 
 	@GetMapping(ApplicationConstant.GET_SINGLE_CUSTOMER_API)
-	public Customer getSinglecustomer(@PathVariable("customerId") long customerId) {
-		return customerServiceImpl.getSingleCustomer(customerId);
+	public Resource<Customer> getSinglecustomer(@PathVariable("customerId") long customerId) {
+		Customer resCustomer= customerServiceImpl.getSingleCustomer(customerId);
+		Resource<Customer> resource= new Resource<Customer>(resCustomer);
+		Link allCustomerLink = ControllerLinkBuilder
+		                .linkTo(ControllerLinkBuilder.methodOn(this.getClass()).getAllcustomer())
+		                .withRel("All-users");
+		resource.add(allCustomerLink);
+		if(resCustomer==null)
+			throw new UserNotFoundException("customer Id==="+customerId+ "not found");
+		return resource;
 	}
+
+	
 
 	@PutMapping(ApplicationConstant.UPDAT_CUSTOMER_API)
 	public Customer updatecustomer(@RequestBody Customer currentcustomer) {
@@ -56,7 +78,10 @@ public class CustomerController {
 
 	@DeleteMapping(ApplicationConstant.DELETE_CUSTOMER_API)
 	public Customer deletecustomer(@PathVariable("customerId") long customerId) {
-		return customerServiceImpl.deleteCustomerById(customerId);
+		Customer resCustomer= customerServiceImpl.getSingleCustomer(customerId);
+		if(resCustomer==null)
+			throw new UserNotFoundException("customer Id==="+customerId+ "not found");
+		return resCustomer;
 
 	}
 
